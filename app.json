@@ -1,0 +1,6 @@
+{
+  "name": "Ikea Stock Check for Heroku",
+  "description": "Checks for a specific item on Ikea store",
+  "image": "heroku/gradle",
+  "addons": [ ]
+}

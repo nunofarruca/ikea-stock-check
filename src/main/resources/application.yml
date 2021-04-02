@@ -1,0 +1,40 @@
+spring.application.name: 'ikea-stock-check'
+
+#server settings
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,application/hal+json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript,image/svg+xml
+  forward-headers-strategy: native
+  error:
+    include-stacktrace: never
+
+management:
+  server:
+    port: 9080
+    servlet:
+      context-path: /
+  endpoints:
+    web:
+      base-path: /admin
+      path-mapping:
+        health: /healthcheck
+  endpoint:
+    health:
+      enabled: true
+
+sendgrid:
+  api-key: ${SEND_GRID_API_KEY}
+  from-email: ${FROM_EMAIL}
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %highlight(%-5level) %yellow(%logger{36}) - %msg%n"
+    file: "%d{HH:mm:ss.SSS} [%thread] [%X{merlin-id}] %-5level %logger{36} - %msg%n"
+  level:
+    ROOT: INFO
+#logging.level.org.hibernate.SQL: DEBUG
+#logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+logging.level.org.hibernate.type: TRACE
+
