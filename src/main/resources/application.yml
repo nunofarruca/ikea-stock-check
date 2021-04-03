@@ -2,7 +2,7 @@ spring.application.name: 'ikea-stock-check'
 
 #server settings
 server:
-  port: 8080
+  port: ${PORT:5000}
   compression:
     enabled: true
     mime-types: application/json,application/hal+json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript,image/svg+xml
