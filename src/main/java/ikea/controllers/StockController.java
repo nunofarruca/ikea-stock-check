@@ -3,6 +3,7 @@ package ikea.controllers;
 import ikea.services.EmailSender;
 import ikea.services.StockCheck;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,14 +24,12 @@ public class StockController {
     public ResponseEntity<String> checkIfStockExists(@RequestParam("id") final String id,
                                                      @RequestParam("email") final String email) {
         try {
-            final boolean availableForHomeDelivery = stockCheck.checkAvailableForHomeDelivery(id);
+            final boolean availableForHomeDelivery = stockCheck.checkAvailableForHomeDelivery(id, email);
             if(availableForHomeDelivery) {
-                emailSender.sendSimpleMessage(email, "Stock Available!", "Stock is available for " + id + ", go check!");
                 return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
-
         } catch(final Exception exception) {
             exception.printStackTrace();
 
