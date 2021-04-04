@@ -18,7 +18,10 @@ public class StockCheck {
     @Autowired
     private RestTemplate restTemplate;
 
-    public boolean checkAvailableForHomeDelivery(final String ikeaId) throws Exception {
+    @Autowired
+    private EmailSender emailSender;
+
+    public boolean checkAvailableForHomeDelivery(final String ikeaId, final String email) throws Exception {
         final String url = String.format(API_URL, ikeaId);
 
         final ResponseEntity<String> exchange = restTemplate.exchange(url, HttpMethod.GET, headers(), String.class);
@@ -26,13 +29,33 @@ public class StockCheck {
             final String body = exchange.getBody();
             final JsonNode rootNode = new ObjectMapper().readValue(body, JsonNode.class);
             final JsonNode availabilities = rootNode.get("availabilities");
+
+            if(availabilities.size() != 2) {
+                throw new RuntimeException("Ikea endpoint returned not expected size");
+            }
+
             for(int i = 0; i < availabilities.size(); i++) {
                 final JsonNode jsonNode = availabilities.get(i);
                 final JsonNode availableForHomeDelivery = jsonNode.get("availableForHomeDelivery");
                 if(availableForHomeDelivery != null && availableForHomeDelivery.asBoolean()) {
+                    final String itemNo = jsonNode.get("itemKey").get("itemNo").textValue();
+                    final String itemType = jsonNode.get("itemKey").get("itemType").textValue();
+
+                    String ikeaItemUrl = "https://www.ikea.com/ie/en/p/ikea-";
+                    if("SPR".equals(itemType)) {
+                        ikeaItemUrl += "s";
+                    }
+
+                    ikeaItemUrl += itemNo;
+
+                    final String message = "Stock is available for " + ikeaId + ", go check! \n" + ikeaItemUrl;
+                    emailSender.sendSimpleMessage(email, "Stock Available!", message);
                     return true;
                 }
             }
+
+        } else {
+            throw new RuntimeException("Ikea endpoint returned NOT OK");
         }
 
         return false;
